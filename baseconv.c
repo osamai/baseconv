@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 
 #ifndef NAME
@@ -27,6 +28,15 @@ numtype_t parse_numtype(char *s) {
 		return NT_HEX;
 	}
 	return NT_UNKNOWN;
+}
+
+bool isbinary(char *input) {
+	for (size_t i = 0; i < strlen(input); i++) {
+		if (input[i] != '0' && input[i] != '1') {
+			return false
+		}
+	}
+	return true;
 }
 
 int main(int argc, char *argv[]) {
@@ -61,6 +71,20 @@ int main(int argc, char *argv[]) {
 			i++;
 		} else {
 			panic(NAME": unknown argument %s\n", argv[i]);
+		}
+	}
+
+	if (!input) {
+		panic(NAME": empty input\n");
+	}
+
+	if (optfrom == NT_UNKNOWN) {
+		if (input[0] == 'x' || (input[0] == '0' && (input[1] == 'x' || input[1] == 'X'))) {
+			optfrom = NT_HEX;
+		} else if (input[0] == '0') {
+			optfrom = isbinary(input) ? NT_BINARY : NT_OCTAL;
+		} else {
+			optfrom = isbinary(input) ? NT_BINARY : NT_DECIMAL;
 		}
 	}
 
