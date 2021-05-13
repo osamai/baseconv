@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef
+#ifndef NAME
 #define NAME "baseconv"
 #endif
 
@@ -51,13 +51,13 @@ int main(int argc, char *argv[]) {
 			if (argc <= i+1 || argv[i+1][0] == '-') {
 				panic(NAME": %s expect a value\n", argv[i]);
 			}
-			optfrom = numtype_parse(argv[i+1]);
+			optfrom = parse_numtype(argv[i+1]);
 			i++;
 		} else if (strcmp(argp, "to") == 0) {
 			if (argc <= i+1 || argv[i+1][0] == '-') {
 				panic(NAME": %s expect a value\n", argv[i]);
 			}
-			optto = numtype_parse(argv[i+1]);
+			optto = parse_numtype(argv[i+1]);
 			i++;
 		} else {
 			panic(NAME": unknown argument %s\n", argv[i]);
