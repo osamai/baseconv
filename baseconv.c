@@ -7,6 +7,7 @@
 #define NAME "baseconv"
 #endif
 
+#define streq(s1, s2) (strcmp(s1, s2) == 0)
 #define panic(...) { fprintf(stderr, __VA_ARGS__); exit(1); }
 
 typedef enum numtype {
@@ -17,20 +18,20 @@ typedef enum numtype {
 	NT_HEX = 16,
 } numtype_t;
 
-numtype_t parse_numtype(char *s) {
-	if (strcmp(s, "bin") == 0 || strcmp(s, "binary") == 0) {
+numtype_t parse_numtype(const char *s) {
+	if (streq(s, "bin") || streq(s, "binary")) {
 		return NT_BINARY;
-	} else if (strcmp(s, "octal") == 0) {
+	} else if (streq(s, "oct") || streq(s, "octal")) {
 		return NT_OCTAL;
-	} else if (strcmp(s, "decimal") == 0) {
+	} else if (streq(s, "dec") || streq(s, "decimal")) {
 		return NT_DECIMAL;
-	} else if (strcmp(s, "hex") == 0 || strcmp(s, "hexadecimal") == 0) {
+	} else if (streq(s, "hex") || streq(s, "hexadecimal")) {
 		return NT_HEX;
 	}
 	return NT_UNKNOWN;
 }
 
-bool isbinary(char *input) {
+bool isbinary(const char *input) {
 	for (size_t i = 0; i < strlen(input); i++) {
 		if (input[i] != '0' && input[i] != '1') {
 			return false;
@@ -39,13 +40,29 @@ bool isbinary(char *input) {
 	return true;
 }
 
-bool isoctal(char *input) {
+bool isoctal(const char *input) {
 	for (size_t i = 0; i < strlen(input); i++) {
-		if (input[i] == '8' || input[i] == '9') {
+		if (input[i] < '0' || input[i] > '7') {
 			return false;
 		}
 	}
 	return true;
+}
+
+void printbin(long long num) {
+	if (num == 0) {
+		puts("0");
+		return;
+	}
+
+	int c = 63;
+	char str[65] = {0};
+	for (; num != 0 && c >= 0; c--) {
+		str[c] = "01"[num&1];
+		num >>= 1;
+	}
+
+	printf("%s\n", str+c+1);
 }
 
 int main(int argc, char *argv[]) {
@@ -56,8 +73,8 @@ int main(int argc, char *argv[]) {
 	numtype_t optfrom = NT_UNKNOWN;
 	numtype_t optto = NT_UNKNOWN;
 
-	char *argp = NULL;
-	char *input = NULL;
+	char *argp = 0;
+	char *input = 0;
 	for (int i = 0; i < argc; i++) {
 		argp = argv[i];
 		if (argp[0] != '-') {
@@ -66,13 +83,13 @@ int main(int argc, char *argv[]) {
 		}
 		argp++;
 		if (argp[0] == '-') argp++;
-		if (strcmp(argp, "from") == 0) {
+		if (streq(argp, "from")) {
 			if (argc <= i+1 || argv[i+1][0] == '-') {
 				panic(NAME": %s expect a value\n", argv[i]);
 			}
 			optfrom = parse_numtype(argv[i+1]);
 			i++;
-		} else if (strcmp(argp, "to") == 0) {
+		} else if (streq(argp, "to")) {
 			if (argc <= i+1 || argv[i+1][0] == '-') {
 				panic(NAME": %s expect a value\n", argv[i]);
 			}
@@ -83,12 +100,14 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (!input || input[0] == '\0') {
+	if (!input || input[0] == 0) {
 		panic(NAME": empty input\n");
 	}
-
 	if (optfrom == NT_BINARY && !isbinary(input)) {
 		panic(NAME": input: invalid binary format\n");
+	}
+	if (optfrom == NT_OCTAL && !isoctal(input)){
+		panic(NAME": input: invalid octal format\n");
 	}
 
 	if (optfrom == NT_UNKNOWN) {
@@ -108,20 +127,20 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	long num = strtol(input, 0, optfrom);
-	printf("%d\t%d\n%ld\n", optfrom, optto, num);
+	long long num = strtol(input, 0, optfrom);
 
 	switch (optto) {
 		case NT_BINARY:
+			printbin(num);
 			break;
 		case NT_OCTAL:
-			printf("%o\n", (unsigned int) num);
+			printf("%o\n", (unsigned int)num);
 			break;
 		case NT_HEX:
-			printf("%x\n", (unsigned int) num);
+			printf("%x\n", (unsigned int)num);
 			break;
-		default: // NT_DECIMAL, NT_UNKNOWN
-			printf("%ld\n", num);
+		default: // NT_DECIMAL || NT_UNKNOWN
+			printf("%lld\n", num);
 			break;
 	}
 
