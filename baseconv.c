@@ -170,13 +170,13 @@ int main(int argc, char *argv[]) {
 		if (argp[0] == '-') {
 			argp++;
 		}
-		if (streq(argp, "from")) {
+		if (streq(argp, "f") || streq(argp, "from")) {
 			if (argc <= i+1 || argv[i+1][0] == '-') {
 				panic(NAME": %s expect a value\n", argv[i]);
 			}
 			optfrom = parse_numtype(argv[i+1]);
 			i++;
-		} else if (streq(argp, "to")) {
+		} else if (streq(argp, "t") || streq(argp, "to")) {
 			if (argc <= i+1 || argv[i+1][0] == '-') {
 				panic(NAME": %s expect a value\n", argv[i]);
 			}
@@ -212,11 +212,7 @@ int main(int argc, char *argv[]) {
 		optfrom = parse_numtype_input(input);
 	}
 
-	printf("optfrom: %d\noptto: %d\n", optfrom, optto);
-	printf("input: %s  %s\n", input, skipprefix(input));
-
 	long long num = strtol(skipprefix(input), 0, optfrom);
-	printf("num: %lld\n", num);
 
 	switch (optto) {
 		case NT_BINARY:
