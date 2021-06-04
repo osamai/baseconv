@@ -49,6 +49,15 @@ bool isoctal(const char *input) {
 	return true;
 }
 
+bool isdecimal(const char* input) {
+	for (size_t i = 0; i < strlen(input); i++) {
+		if (input[i] < '0' || input[i] > '9') {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool ishex(const char *input) {
 	for (size_t i = 0; i < strlen(input); i++) {
 		if (input[i] < '0' || toupper(input[i]) > 'F') {
@@ -109,10 +118,13 @@ numtype_t parse_numtype_input(const char *input) {
 			if (isoctal(input)) {
 				return NT_OCTAL;
 			}
+			if (isdecimal(input)) {
+				return NT_DECIMAL;
+			}
 			if (ishex(input)) {
 				return NT_HEX;
 			}
-			return NT_DECIMAL;
+			return NT_UNKNOWN;
 	}
 }
 
@@ -183,6 +195,9 @@ int main(int argc, char *argv[]) {
 	}
 	if (optfrom == NT_OCTAL && !isoctal(input)){
 		panic(NAME": input: invalid octal format\n");
+	}
+	if (optfrom == NT_DECIMAL && !isdecimal(input)) {
+		panic(NAME": input: invalid decimal format\n");
 	}
 	if (optfrom == NT_HEX && !ishex(input)) {
 		panic(NAME": input: invalid hexadecimal format\n");
