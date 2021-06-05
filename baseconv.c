@@ -6,6 +6,15 @@
 
 #define NAME "baseconv"
 
+void usage(bool ok) {
+	FILE *out = ok ? stdout : stderr;
+	fprintf(out, "usage: "NAME" [options] <input>\n");
+	fprintf(out, "  -from    base to convert from (binary, octal, decimal, hexadecimal).\n");
+	fprintf(out, "  -to      base to convert to (binary, octal, decimal, hexadecimal).\n");
+	fprintf(out, "  -help    show this message.\n");
+	exit(!ok);
+}
+
 int main(int argc, char *argv[]) {
 	if (argc == 1) {
 		panic(NAME": at least one argument is required\n");
@@ -22,23 +31,26 @@ int main(int argc, char *argv[]) {
 			input = argp;
 			continue;
 		}
+		argp++;
 		if (argp[0] == '-') {
 			argp++;
 		}
-		if (streq(argp, "f") || streq(argp, "from")) {
-			if (argc <= i+1 || argv[i+1][0] == '-') {
-				panic(NAME": %s expect a value\n", argv[i]);
-			}
-			optfrom = parse_numtype(argv[i+1]);
+		if (streq(argp, "from")) {
 			i++;
-		} else if (streq(argp, "t") || streq(argp, "to")) {
-			if (argc <= i+1 || argv[i+1][0] == '-') {
-				panic(NAME": %s expect a value\n", argv[i]);
+			if (argc <= i || argv[i][0] == '-') {
+				panic(NAME": -%s expects a value\n", argp);
 			}
-			optto = parse_numtype(argv[i+1]);
+			optfrom = parse_numtype(argv[i]);
+		} else if (streq(argp, "to")) {
 			i++;
+			if (argc <= i || argv[i][0] == '-') {
+				panic(NAME": -%s expects a value\n", argp);
+			}
+			optto = parse_numtype(argv[i]);
+		} else if (streq(argp, "help")) {
+			usage(true);
 		} else {
-			panic(NAME": unknown argument %s\n", argv[i]);
+			usage(false);
 		}
 	}
 
@@ -58,30 +70,30 @@ int main(int argc, char *argv[]) {
 		panic(NAME": input: invalid hexadecimal format\n");
 	}
 
-	char prefix = 0;
-	if (input[0] == '+' || input[0] == '-') {
-		prefix = input[0];
-	}
-
 	if (optfrom == NT_UNKNOWN) {
 		optfrom = parse_numtype_input(input);
 	}
 
 	long long num = strtol(skipprefix(input), 0, optfrom);
 
+	char sign = 0;
+	if (num != 0 && (input[0] == '+' || input[0] == '-')) {
+		sign = input[0];
+	}
+
 	switch (optto) {
-		case NT_BINARY:
-			printbin(prefix == '-' ? -num : num);
-			break;
-		case NT_OCTAL:
-			printf("%c0o%o\n", prefix, (unsigned int)num);
-			break;
-		case NT_HEX:
-			printf("%c0x%x\n", prefix, (unsigned int)num);
-			break;
-		default: // NT_DECIMAL || NT_UNKNOWN
-			printf("%c%lld\n", prefix, num);
-			break;
+	case NT_BINARY:
+		printbin(sign == '-' ? -num : num);
+		break;
+	case NT_OCTAL:
+		printf("%c0o%o\n", sign, (unsigned int)num);
+		break;
+	case NT_HEX:
+		printf("%c0x%x\n", sign, (unsigned int)num);
+		break;
+	default: // NT_DECIMAL || NT_UNKNOWN
+		printf("%c%lld\n", sign, num);
+		break;
 	}
 
 	return 0;

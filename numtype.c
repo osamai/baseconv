@@ -23,25 +23,25 @@ numtype_t parse_numtype_input(const char *input) {
 		input++;
 	}
 	switch (toupper(input[0])) {
-		case 'B':
+	case 'B':
+		return NT_BINARY;
+	case 'O':
+		return NT_OCTAL;
+	case 'X':
+		return NT_HEX;
+	default:
+		if (isbinary(input)) {
 			return NT_BINARY;
-		case 'O':
+		}
+		if (isoctal(input)) {
 			return NT_OCTAL;
-		case 'X':
+		}
+		if (isdecimal(input)) {
+			return NT_DECIMAL;
+		}
+		if (ishex(input)) {
 			return NT_HEX;
-		default:
-			if (isbinary(input)) {
-				return NT_BINARY;
-			}
-			if (isoctal(input)) {
-				return NT_OCTAL;
-			}
-			if (isdecimal(input)) {
-				return NT_DECIMAL;
-			}
-			if (ishex(input)) {
-				return NT_HEX;
-			}
-			return NT_UNKNOWN;
+		}
+		return NT_UNKNOWN;
 	}
 }
