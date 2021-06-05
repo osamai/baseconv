@@ -16,7 +16,7 @@ numtype_t parse_numtype(const char *s) {
 }
 
 numtype_t parse_numtype_input(const char *input) {
-	if (input[0] == '+' || input[0] == '-'){
+	if (input[0] == '+' || input[0] == '-') {
 		input++;
 	}
 	if (input[0] == '0') {

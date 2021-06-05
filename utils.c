@@ -41,7 +41,7 @@ bool isoctal(const char *input) {
 	return true;
 }
 
-bool isdecimal(const char* input) {
+bool isdecimal(const char *input) {
 	for (size_t i = 0; i < strlen(input); i++) {
 		if (input[i] < '0' || input[i] > '9') {
 			return false;
