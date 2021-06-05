@@ -6,7 +6,7 @@
 #define panic(...) { fprintf(stderr, __VA_ARGS__); exit(1); }
 
 int toupper(int);
-char *skipprefix(char *);
+char *trimnum(char *);
 bool isbinary(const char *);
 bool isoctal(const char *);
 bool isdecimal(const char *);

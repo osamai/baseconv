@@ -9,7 +9,10 @@ int toupper(int c) {
   return c - 'a' + 'A';
 }
 
-char *skipprefix(char *input) {
+char *trimnum(char *input) {
+	if (!input || strlen(input) < 2) {
+		return input;
+	}
 	if (input[0] == '+' || input[0] == '-') {
 		input++;
 	}
@@ -20,6 +23,7 @@ char *skipprefix(char *input) {
 	if (c == 'B' || c == 'O' || c == 'X') {
 		input++;
 	}
+	for (; *input == '0'; input++);
 	return input;
 }
 

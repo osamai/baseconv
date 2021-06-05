@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 	char *input = 0;
 	for (int i = 1; i < argc; i++) {
 		argp = argv[i];
-		if (argp[0] != '-' || (argp[0] == '-' && isnumber(skipprefix(argp)))) {
+		if (argp[0] != '-' || (argp[0] == '-' && isnumber(trimnum(argp)))) {
 			input = argp;
 			continue;
 		}
@@ -54,6 +54,8 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	input = trimnum(input);
+
 	if (!input || input[0] == 0) {
 		panic(NAME": empty input\n");
 	}
@@ -72,9 +74,12 @@ int main(int argc, char *argv[]) {
 
 	if (optfrom == NT_UNKNOWN) {
 		optfrom = parse_numtype_input(input);
+		if (optfrom == NT_UNKNOWN) {
+			panic(NAME": input: cannot guess input type, try to set -from")
+		}
 	}
 
-	long long num = strtol(skipprefix(input), 0, optfrom);
+	long long num = strtol(input, 0, optfrom);
 
 	char sign = 0;
 	if (num != 0 && (input[0] == '+' || input[0] == '-')) {
