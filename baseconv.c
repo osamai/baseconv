@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 	char *input = 0;
 	for (int i = 1; i < argc; i++) {
 		argp = argv[i];
-		if (argp[0] != '-' || (argp[0] == '-' && isnumber(trimnum(argp)))) {
+		if (!input && (argp[0] != '-' || (argp[0] == '-' && isnumber(trimnum(argp))))) {
 			input = argp;
 			continue;
 		}
@@ -57,12 +57,12 @@ int main(int argc, char *argv[]) {
 	input = trimnum(input);
 
 	if (!input || input[0] == 0) {
-		panic(NAME": empty input\n");
+		panic(NAME": invalid input\n");
 	}
 	if (optfrom == NT_BINARY && !isbinary(input)) {
 		panic(NAME": input: invalid binary format\n");
 	}
-	if (optfrom == NT_OCTAL && !isoctal(input)){
+	if (optfrom == NT_OCTAL && !isoctal(input)) {
 		panic(NAME": input: invalid octal format\n");
 	}
 	if (optfrom == NT_DECIMAL && !isdecimal(input)) {
