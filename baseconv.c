@@ -52,6 +52,15 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	if (!input || input[0] == 0) {
+		panic(": empty input");
+	}
+
+	char sign = 0;
+	if (input[0] == '+' || input[0] == '-') {
+		sign = input[0];
+	}
+
 	input = trimnum(input);
 
 	if (!input || input[0] == 0) {
@@ -78,11 +87,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	long long num = strtol(input, 0, optfrom);
-
-	char sign = 0;
-	if (num != 0 && (input[0] == '+' || input[0] == '-')) {
-		sign = input[0];
-	}
 
 	switch (optto) {
 	case NT_BINARY:
