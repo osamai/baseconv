@@ -4,9 +4,7 @@
 #include "numtype.h"
 #include "utils.h"
 
-#define NAME "baseconv"
-
-void usage(bool ok) {
+static void usage(bool ok) {
 	FILE *out = ok ? stdout : stderr;
 	fprintf(out, "usage: "NAME" [options] <input>\n");
 	fprintf(out, "  -from    base to convert from (binary, octal, decimal, hexadecimal).\n");
@@ -17,7 +15,7 @@ void usage(bool ok) {
 
 int main(int argc, char *argv[]) {
 	if (argc == 1) {
-		panic(NAME": at least one argument is required\n");
+		panic(": at least one argument is required");
 	}
 
 	numtype_t optfrom = NT_UNKNOWN;
@@ -27,7 +25,7 @@ int main(int argc, char *argv[]) {
 	char *input = 0;
 	for (int i = 1; i < argc; i++) {
 		argp = argv[i];
-		if (!input && (argp[0] != '-' || (argp[0] == '-' && isnumber(trimnum(argp))))) {
+		if (!input && (argp[0] != '-' || (argp[0] == '-' && ishexadecimal(trimnum(argp))))) {
 			input = argp;
 			continue;
 		}
@@ -38,13 +36,13 @@ int main(int argc, char *argv[]) {
 		if (streq(argp, "from")) {
 			i++;
 			if (argc <= i || argv[i][0] == '-') {
-				panic(NAME": -%s expects a value\n", argp);
+				panic(": -%s expects a value", argp);
 			}
 			optfrom = parse_numtype(argv[i]);
 		} else if (streq(argp, "to")) {
 			i++;
 			if (argc <= i || argv[i][0] == '-') {
-				panic(NAME": -%s expects a value\n", argp);
+				panic(": -%s expects a value", argp);
 			}
 			optto = parse_numtype(argv[i]);
 		} else if (streq(argp, "help")) {
@@ -57,25 +55,25 @@ int main(int argc, char *argv[]) {
 	input = trimnum(input);
 
 	if (!input || input[0] == 0) {
-		panic(NAME": invalid input\n");
+		panic(": invalid input");
 	}
 	if (optfrom == NT_BINARY && !isbinary(input)) {
-		panic(NAME": input: invalid binary format\n");
+		panic(": input: invalid binary format");
 	}
 	if (optfrom == NT_OCTAL && !isoctal(input)) {
-		panic(NAME": input: invalid octal format\n");
+		panic(": input: invalid octal format");
 	}
 	if (optfrom == NT_DECIMAL && !isdecimal(input)) {
-		panic(NAME": input: invalid decimal format\n");
+		panic(": input: invalid decimal format");
 	}
-	if (optfrom == NT_HEX && !ishex(input)) {
-		panic(NAME": input: invalid hexadecimal format\n");
+	if (optfrom == NT_HEXADECIMAL && !ishexadecimal(input)) {
+		panic(": input: invalid hexadecimal format");
 	}
 
 	if (optfrom == NT_UNKNOWN) {
 		optfrom = parse_numtype_input(input);
 		if (optfrom == NT_UNKNOWN) {
-			panic(NAME": input: cannot guess input type, try to set -from")
+			panic(": input: cannot guess input type, try to set -from");
 		}
 	}
 
@@ -93,7 +91,7 @@ int main(int argc, char *argv[]) {
 	case NT_OCTAL:
 		printf("%c0o%o\n", sign, (unsigned int)num);
 		break;
-	case NT_HEX:
+	case NT_HEXADECIMAL:
 		printf("%c0x%x\n", sign, (unsigned int)num);
 		break;
 	default: // NT_DECIMAL || NT_UNKNOWN
