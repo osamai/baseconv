@@ -1,12 +1,34 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include "utils.h"
 
+void panic(const char *fmt, ...) {
+	if (fmt[0] == ':') {
+		fputs(NAME, stderr);
+	}
+
+	va_list ap;
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+
+	if (fmt[0] != 0 && fmt[strlen(fmt)-1] == ':') {
+		fputc(' ', stderr);
+		perror(0);
+	} else {
+		fputc('\n', stderr);
+	}
+
+	exit(1);
+}
+
 int toupper(int c) {
-  if (c < 'a' || c > 'z') {
-    return c;
-  }
-  return c - 'a' + 'A';
+	if (c < 'a' || c > 'z') {
+		return c;
+	}
+	return c - 'a' + 'A';
 }
 
 char *trimnum(char *input) {
