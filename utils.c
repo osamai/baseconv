@@ -14,17 +14,11 @@ void panic(const char *fmt, ...) {
 	vfprintf(stderr, fmt, ap);
 	va_end(ap);
 
-	if (fmt[0] != 0 && fmt[strlen(fmt)-1] == ':') {
-		fputc(' ', stderr);
-		perror(0);
-	} else {
-		fputc('\n', stderr);
-	}
-
+	fputc('\n', stderr);
 	exit(1);
 }
 
-int toupper(int c) {
+char ctoupper(char c) {
 	if (c < 'a' || c > 'z') {
 		return c;
 	}
@@ -41,57 +35,12 @@ char *trimnum(char *input) {
 	if (input[0] == '0') {
 		input++;
 	}
-	char c = toupper(input[0]);
+	char c = ctoupper(input[0]);
 	if (c == 'B' || c == 'O' || c == 'X') {
 		input++;
 	}
-	for (; *input == '0'; input++);
+	for (; input[0] == '0'; input++);
 	return input;
-}
-
-bool isbinary(const char *input) {
-	for (size_t i = 0; i < strlen(input); i++) {
-		if (input[i] != '0' && input[i] != '1') {
-			return false;
-		}
-	}
-	return true;
-}
-
-bool isoctal(const char *input) {
-	for (size_t i = 0; i < strlen(input); i++) {
-		if (input[i] < '0' || input[i] > '7') {
-			return false;
-		}
-	}
-	return true;
-}
-
-bool isdecimal(const char *input) {
-	for (size_t i = 0; i < strlen(input); i++) {
-		if (input[i] < '0' || input[i] > '9') {
-			return false;
-		}
-	}
-	return true;
-}
-
-bool ishex(const char *input) {
-	for (size_t i = 0; i < strlen(input); i++) {
-		if (input[i] < '0' || toupper(input[i]) > 'F') {
-			return false;
-		}
-	}
-	return true;
-}
-
-bool isnumber(const char *input) {
-	for (size_t i = 0; i < strlen(input); i++) {
-		if (input[i] < '0' || toupper(input[i]) > 'F') {
-			return false;
-		}
-	}
-	return true;
 }
 
 void printbin(long long num) {
