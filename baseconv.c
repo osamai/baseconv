@@ -52,54 +52,62 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	if (!input || input[0] == 0) {
+	if (!input || !*input) {
 		panic(": empty input");
 	}
 
-	char sign = 0;
-	if (input[0] == '+' || input[0] == '-') {
-		sign = input[0];
-	}
-
-	input = trimnum(input);
-
-	if (!input || input[0] == 0) {
+	char* numstr = trimnum(input);
+	if (!numstr || !*numstr) {
 		panic(": invalid input");
 	}
-	if (optfrom == NT_BINARY && !isbinary(input)) {
-		panic(": input: invalid binary format");
-	}
-	if (optfrom == NT_OCTAL && !isoctal(input)) {
-		panic(": input: invalid octal format");
-	}
-	if (optfrom == NT_DECIMAL && !isdecimal(input)) {
-		panic(": input: invalid decimal format");
-	}
-	if (optfrom == NT_HEXADECIMAL && !ishexadecimal(input)) {
-		panic(": input: invalid hexadecimal format");
-	}
 
-	if (optfrom == NT_UNKNOWN) {
+	switch (optfrom) {
+	case NT_BINARY:
+		if (!isbinary(numstr)) {
+			panic(": input: invalid binary format");
+		}
+		break;
+	case NT_OCTAL:
+		if (!isoctal(numstr)) {
+			panic(": input: invalid octal format");
+		}
+		break;
+	case NT_DECIMAL:
+		if (!isdecimal(numstr)) {
+			panic(": input: invalid decimal format");
+		}
+		break;
+	case NT_HEXADECIMAL:
+		if (!ishexadecimal(numstr)) {
+			panic(": input: invalid hexadecimal format");
+		}
+		break;
+	default: // NT_UNKNOWN
 		optfrom = parse_numtype_input(input);
 		if (optfrom == NT_UNKNOWN) {
 			panic(": input: cannot guess input type, try to set -from");
 		}
+		break;
 	}
 
-	long long num = strtol(input, 0, optfrom);
+	long long num = strtol(numstr, 0, optfrom);
+
+	if (num != 0 && (input[0] == '+' || input[0] == '-')) {
+		putchar(input[0]);
+	}
 
 	switch (optto) {
 	case NT_BINARY:
-		printbin(sign == '-' ? -num : num);
+		printbin(input[0] == '-' ? -num : num);
 		break;
 	case NT_OCTAL:
-		printf("%c0o%o\n", sign, (unsigned int)num);
+		printf("0o%o\n", (unsigned int)num);
 		break;
 	case NT_HEXADECIMAL:
-		printf("%c0x%x\n", sign, (unsigned int)num);
+		printf("0x%x\n", (unsigned int)num);
 		break;
 	default: // NT_DECIMAL || NT_UNKNOWN
-		printf("%c%lld\n", sign, num);
+		printf("%lld\n", num);
 		break;
 	}
 
