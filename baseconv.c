@@ -1,112 +1,98 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "numtype.h"
 #include "utils.h"
 
 static void usage(bool ok) {
 	FILE *out = ok ? stdout : stderr;
-	fprintf(out, "usage: "NAME" [options] <input>\n");
-	fprintf(out, "  -from    base to convert from (binary, octal, decimal, hexadecimal).\n");
-	fprintf(out, "  -to      base to convert to (binary, octal, decimal, hexadecimal).\n");
-	fprintf(out, "  -help    show this message.\n");
+	fputs(
+			"usage: baseconv [options] <input>\n"
+			"  -from    base to convert from (binary, octal, decimal, hexadecimal).\n"
+			"  -to      base to convert to (binary, octal, decimal, hexadecimal).\n"
+			"  -help    show this message.\n",
+			out);
 	exit(!ok);
 }
 
 int main(int argc, char *argv[]) {
-	if (argc == 1) {
+	if (argc == 1)
 		panic(": at least one argument is required");
-	}
 
-	numtype_t optfrom = NT_UNKNOWN;
-	numtype_t optto = NT_UNKNOWN;
-
-	char *argp = 0;
+	int from = 0;
+	int to = 0;
 	char *input = 0;
-	for (int i = 1; i < argc; i++) {
-		argp = argv[i];
-		if (!input && (argp[0] != '-' || (argp[0] == '-' && ishexadecimal(trimnum(argp))))) {
-			input = argp;
+
+	while (argc > 1) {
+		argc--; argv++;
+		if (*argv[0] != '-' || (*argv[0] == '-' && ishex(trimnum(*argv)))) {
+			input = argv[0];
 			continue;
 		}
-		argp++;
-		if (argp[0] == '-') {
-			argp++;
-		}
-		if (streq(argp, "from")) {
-			i++;
-			if (argc <= i || argv[i][0] == '-') {
-				panic(": -%s expects a value", argp);
-			}
-			optfrom = parse_numtype(argv[i]);
-		} else if (streq(argp, "to")) {
-			i++;
-			if (argc <= i || argv[i][0] == '-') {
-				panic(": -%s expects a value", argp);
-			}
-			optto = parse_numtype(argv[i]);
-		} else if (streq(argp, "help")) {
+		if (argv[0][0] == '-' && argv[0][1] == '-')
+			argv[0]++;
+		if (streq(*argv, "-from")) {
+			if (argc == 1 || *argv[1] == '-')
+				panic(": -%s expects a value", *argv);
+			from = basefromname(argv[1]);
+		} else if (streq(*argv, "-to")) {
+			if (argc == 1 || *argv[1] == '-')
+				panic(": -%s expects a value", *argv);
+			to = basefromname(argv[1]);
+		} else if (streq(*argv, "-help")) {
 			usage(true);
 		} else {
 			usage(false);
 		}
 	}
 
-	if (!input || !*input) {
+	if (!input || !*input)
 		panic(": empty input");
-	}
 
 	char* numstr = trimnum(input);
-	if (!numstr || !*numstr) {
+	if (!numstr || !*numstr)
 		panic(": invalid input");
+
+	if (!from) {
+		from = basefrominput(input);
+		if (!from)
+			panic(": cannot guess input type, try to set -from");
 	}
 
-	switch (optfrom) {
-	case NT_BINARY:
-		if (!isbinary(numstr)) {
-			panic(": input: invalid binary format");
-		}
+	switch (from) {
+	case 2:
+		if (!isbin(numstr))
+			panic(": invalid binary format");
 		break;
-	case NT_OCTAL:
-		if (!isoctal(numstr)) {
-			panic(": input: invalid octal format");
-		}
+	case 8:
+		if (!isoct(numstr))
+			panic(": invalid octal format");
 		break;
-	case NT_DECIMAL:
-		if (!isdecimal(numstr)) {
-			panic(": input: invalid decimal format");
-		}
+	case 10:
+		if (!isdec(numstr))
+			panic(": invalid decimal format");
 		break;
-	case NT_HEXADECIMAL:
-		if (!ishexadecimal(numstr)) {
-			panic(": input: invalid hexadecimal format");
-		}
-		break;
-	default: // NT_UNKNOWN
-		optfrom = parse_numtype_input(input);
-		if (optfrom == NT_UNKNOWN) {
-			panic(": input: cannot guess input type, try to set -from");
-		}
+	case 16:
+		if (!ishex(numstr))
+			panic(": invalid hexadecimal format");
 		break;
 	}
 
-	long long num = strtol(numstr, 0, optfrom);
+	long long num = strtol(numstr, 0, from);
 
-	if (num != 0 && (input[0] == '+' || input[0] == '-')) {
-		putchar(input[0]);
-	}
+	if (num != 0 && (*input == '+' || *input == '-'))
+		putchar(*input);
 
-	switch (optto) {
-	case NT_BINARY:
-		printbin(input[0] == '-' ? -num : num);
+	switch (to) {
+	case 2:
+		printbin(num);
 		break;
-	case NT_OCTAL:
+	case 8:
 		printf("0o%o\n", (unsigned int)num);
 		break;
-	case NT_HEXADECIMAL:
+	case 16:
 		printf("0x%x\n", (unsigned int)num);
 		break;
-	default: // NT_DECIMAL || NT_UNKNOWN
+	default: // 10 || unknown
 		printf("%lld\n", num);
 		break;
 	}

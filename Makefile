@@ -1,5 +1,5 @@
 CC = cc
-CFLAGS = -std=c99 -pedantic -Wall -Wextra -Os
+CFLAGS = -std=c99 -pedantic -Wall -Wextra -O2
 SRC = $(wildcard *.c)
 
 DESTDIR ?= /usr/local
