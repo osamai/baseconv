@@ -7,8 +7,8 @@ static void usage(bool ok) {
 	FILE *out = ok ? stdout : stderr;
 	fputs(
 			"usage: baseconv [options] <input>\n"
-			"  -from    base to convert from (binary, octal, decimal, hexadecimal).\n"
-			"  -to      base to convert to (binary, octal, decimal, hexadecimal).\n"
+			"  -from    base to convert from binary, octal, decimal, hexadecimal.\n"
+			"  -to      base to convert to binary, octal, decimal, hexadecimal.\n"
 			"  -help    show this message.\n",
 			out);
 	exit(!ok);
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 	while (argc > 1) {
 		argc--; argv++;
 		if (*argv[0] != '-' || (*argv[0] == '-' && ishex(trimnum(*argv)))) {
-			input = argv[0];
+			input = *argv;
 			continue;
 		}
 		if (argv[0][0] == '-' && argv[0][1] == '-')
@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
 		break;
 	}
 
-	long long num = strtol(numstr, 0, from);
+	unsigned long long num = strtoull(numstr, 0, from);
 
 	if (num != 0 && (*input == '+' || *input == '-'))
 		putchar(*input);
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
 		printf("0x%x\n", (unsigned int)num);
 		break;
 	default: // 10 || unknown
-		printf("%lld\n", num);
+		printf("%llu\n", num);
 		break;
 	}
 

@@ -1,5 +1,5 @@
 #ifndef _UTILS_H
-#define _UTILS_H
+#define _UTILS_H 1
 
 #include <stdbool.h>
 
@@ -17,6 +17,6 @@ int basefrominput(const char *input);
 
 char *trimnum(char *input);
 
-void printbin(long long num);
+void printbin(unsigned long long num);
 
-#endif // _UTILS_H
+#endif
