@@ -3,23 +3,21 @@
 #include <string.h>
 #include "utils.h"
 
-static void usage(bool ok) {
-	FILE *out = ok ? stdout : stderr;
-	fputs(
+static void printusage(void) {
+	puts(
 			"usage: baseconv [options] <input>\n"
 			"  -from    base to convert from binary, octal, decimal, hexadecimal.\n"
 			"  -to      base to convert to binary, octal, decimal, hexadecimal.\n"
-			"  -help    show this message.\n",
-			out);
-	exit(!ok);
+			"  -help    show this message.\n"
+			);
 }
 
 int main(int argc, char *argv[]) {
 	if (argc == 1)
 		panic(": at least one argument is required");
 
-	int from = 0;
 	int to = 0;
+	int from = 0;
 	char *input = 0;
 
 	while (argc > 1) {
@@ -30,18 +28,23 @@ int main(int argc, char *argv[]) {
 		}
 		if (argv[0][0] == '-' && argv[0][1] == '-')
 			argv[0]++;
-		if (streq(*argv, "-from")) {
+		if (streq(*argv, "-to") || streq(*argv, "-from")) {
 			if (argc == 1 || *argv[1] == '-')
 				panic(": -%s expects a value", *argv);
-			from = basefromname(argv[1]);
-		} else if (streq(*argv, "-to")) {
-			if (argc == 1 || *argv[1] == '-')
-				panic(": -%s expects a value", *argv);
-			to = basefromname(argv[1]);
+			int b = basefromname(argv[1]);
+			if (b == 0)
+				panic(": %s: invalid base", argv[1]);
+			if (argv[0][1] == 't')
+				to = b;
+			else
+				from = b;
+			argc--; argv++;
 		} else if (streq(*argv, "-help")) {
-			usage(true);
+			printusage();
+			return 0;
 		} else {
-			usage(false);
+			printusage();
+			return 1;
 		}
 	}
 
